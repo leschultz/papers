@@ -1,0 +1,47 @@
+\section{Introduction}
+
+\begin{enumerate}
+
+    \item While machine learning has made remarkable advances in numerous fields, it is crucial to exercise caution when applying a model. Although models often exhibit impressive performance on test data that is sampled similarly to the training data, they can experience performance degradation when deployed in real-world scenarios.
+    
+    \item Discuss current research on changes/shifts in domains and their impact on model reliability. Many examples are included in \cite{Koh2020}.
+
+    \item When developing a machine learning (ML) model, three key factors contribute to its overall effectiveness:
+
+    \begin{enumerate}
+        \item Accuracy: This refers to the model's ability to make precise and accurate predictions. Achieving high accuracy is a fundamental goal in supervised ML studies.
+        \item Precision: In addition to accuracy, precision involves ensuring that the model's error bars or uncertainty estimates are reliable and accurately reflect the level of uncertainty associated with the predictions.
+        \item Applicability: Applicability refers to the ability of the model to provide reliable predictions within its intended domain. It is crucial that the model's predictions are applicable and valid within the specific context for which it was trained. This aspect ensures that the model's outputs are meaningful and reliable for the intended use case.
+    \end{enumerate}
+
+    \item While a significant amount of ML research in the materials science and engineering (MSE) focuses on achieving accuracy (point 1), there has been increasing attention towards precision (point 2) in recent years. However, relatively less emphasis has been placed on addressing applicability (point 3), which remains an area with significant untapped potential.
+
+    \item Our research addresses the crucial aspect of applicability (point 3) while also providing a comprehensive framework that encompasses accuracy, precision, and applicability. By tackling all three aspects, our research contributes to a more comprehensive and robust approach in ML studies within the MSE field.
+    
+    \item A first step in determining whether a prediction is reliable is through uncertainty quantification. Uncertainty quantification has been extensively studied in both classification and regression settings to assess the reliability of predictions and have many well-developed techniques \cite{Abdar2021, Scalia2020, Tran2019, Caruana2005, Kull2017}. Often, there is a need to enhance the reliability of uncertainty measures by introducing modifications to make them more robust and dependable.
+    
+    \begin{enumerate}
+    
+        \item Define calibration: ``Calibration of a model refers to the property of outputting probability distributions that are consistent with observed empirical frequencies'' \cite{Scalia2020}.
+        
+        \begin{enumerate}
+            \item Classification: Platt scaling or isotonic regression \cite{Caruana2005}.
+            \item Regression: Parametric models or isotonic regression \cite{Busk2022, Morgan2020, Hirschfeld2020}.
+        \end{enumerate}
+        
+        \item Mention the many ways one can assess whether uncertainties are calibrated \cite{Pernot2022}.
+        
+        \item Discuss non-deep ensemble models as seen in Glen Palmer's work \cite{Palmer2022}.
+        
+    \end{enumerate}
+    
+\item The reliability of uncertainty predictions, even when calibrated, is limited to the model's domain of applicability. This limitation can be likened to a pendulum problem, where the model's uncertainty quantification tends to deteriorate when making predictions on data with features outside the range of what the model was trained on \cite{Caldeira2020}. In the supplemental section of the research paper by Palmer et al. (2022), additional work demonstrates that uncertainties lose their reliability when applied beyond the chemical domain of a model \cite{Palmer2022}.
+
+\item It is crucial to conduct a thorough analysis of the model's underlying data space to prevent its application on significantly dissimilar data. By studying the boundaries and characteristics of the data space, we can effectively identify instances where caution is necessary before applying the model.
+
+\item Comparing the space of training data and a test sample is an intuitive concept to study domain. Model-agnostic spatial approaches include convex hulls, distance measures, probability density estimates, et cetera \cite{Jaworska2005}. Additionally, researchers have achieved promising results by studying the latent space of neural networks. Studies have revealed that test samples closer in the training latent space tend to exhibit lower errors compared to those farther away, as demonstrated by Janet et al. \cite{Janet2019}. In the machine learning field of domain adaptation, researchers aim to enhance a model's performance and generalization capabilities by modifying either the test data or model parameters with respect to differences between training and testing space \cite{domain_adaptation, de2021adapt}.
+
+\item Our research focuses on evaluating the effectiveness of probability density estimates using Kernel Density Estimation (KDE) as a means to distinguish domains. We employ three distinct approaches: chemical intuition, single numerical techniques, and statistical numerical techniques. For relevant data sets, we generate features for materials with known target variables, as well as materials with unknown target variables in other chemical groups and measure KDE. Our findings demonstrate that KDE can effectively separate chemical groups, aligning with chemical intuition.
+
+\item On the numerical front, we illustrate that individual predictions for data located further away from the training data exhibit higher residuals overall. We propose a residual cutoff as a means to identify both ID and OD data. Furthermore, we compare the statistics from subsets of all predictions with an expected distributions. Our results reveal that data located further away from the training data deviate from the expected patterns.
+\end{enumerate}

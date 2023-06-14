@@ -1,0 +1,31 @@
+\section{Variables, Definitions, and Acronyms}
+
+\begin{itemize}
+    \item $y$: The target variable for regression
+    \item $\hat{y}$: The predicted target variable
+    \item $\sigma_{y}$: The standard deviation of the target variable used for fitting a model
+    \item $\sigma_{u}$: The uncalibrated uncertainty from ensemble models
+    \item $\sigma_{c}$: The calibrated uncertainty from ensemble models
+    \item $z$: $z=\frac{y-\hat{y}}{\sigma_{c}}$ and is also called the z-score
+    \item $T_{high}$: $T_{C}$ $>$ 50 $[K]$
+    \item $T_{low}$: $T_{C}$ $\leq$ 50 $[K]$
+    \item MAE: Mean Average Error
+    \item RMSE: Root Mean Squared Error
+    \item $R^{2}$: The coefficient of determination
+    \item PR: Precision Recall
+    \item PR Baseline: The number of positive classes over the number of total classes
+    \item AUC: Area under the Curve
+    \item Relative AUC: The fraction of total area above the PR Baseline that a PR curve covers
+    \item UQ: Uncertainty Quantification
+    \item KDE: Kernel Density Estimate
+    \item D: The dissimilarity metric of choice (may use 1-KDE, D, and dissimilarity interchangeably but need to agree on a convention. I like D personally.)
+    \item PPB: Points Per Bin
+    \item CV: Cross Validation
+    \item ID: In Domain
+    \item OD: Out of Domain
+    \item PDF: Probability Density Function
+    \item CDF: Cumulative Distribution Function
+    \item Miscalibration Area: The area between an observed CDF and a standard normal CDF
+    \item MAST-ML: Materials Simulation Toolkit for Machine Learning
+    \item MSE: Materials Science and Engineering
+\end{itemize}

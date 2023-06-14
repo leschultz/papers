@@ -1,0 +1,76 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=1.0in,bottom=1.0in,left=1.0in,right=1.0in]{geometry}
+
+\usepackage{xurl}
+\usepackage{graphicx}
+\usepackage{float}
+
+\usepackage{csquotes}
+\usepackage[natbib=true,
+            style=ieee,
+            sorting=none,
+            citestyle=numeric-comp
+            ]{biblatex}
+\addbibresource{bibliography.bib}
+\usepackage{hyperref}
+
+\title{Kernel Density Estimates for Quantifying Material Domains}
+
+\usepackage{authblk}
+\author[a]{Lane E. Schultz}
+\author[d]{Yiqi Wang}
+\author[a]{Doyeon Kim}
+\author[a]{Ryan Jacobs}
+\author[a]{Dane Morgan}
+\author[b,c]{Aristana Scourtas}
+\author[b,c]{K.J. Schmidt}
+\author[b,c]{Ben Blaiszik}
+
+\affil[a]{University of Wisconsin-Madison, 1500 engineering Drive, Madison, WI 53706, USA}
+\affil[b]{Argonne National Laboratory, Data Science and Learning Division, Chicago, Lemont 60439, USA}
+\affil[c]{University of Chicago, Globus, Chicago 60637, USA}
+\affil[d]{Carnegie Mellon University, 5000 Forbes Ave, Pittsburgh, PA 15213, USA}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Target Journals}
+
+\begin{enumerate}
+    \item Computational Material Science (Elsevier)
+    \item NPJ Computational Materials
+    \item Nature Computational Science
+    \item Journal of Material Informatics (OAE)
+\end{enumerate}
+
+\section{Key Goals}
+
+\begin{itemize}
+    \item Demonstrate the use of kernel density estimates (KDE) for quantifying material domains via three methods:
+    \begin{enumerate}
+        \item A chemical intuition method that involves grouping materials based on their chemical constituents, which relies on a researcher's knowledge of chemistry to discern domains.
+        \item A single valued numerical approach which studies the residual from predictions on split data with repeated cross fold validation and a bootstrapped leave one cluster out. The single valued approach is applicable to a wider range of model types compared to methods that rely on models capable of providing uncertainty estimates. This is because the single valued approach does not depend on the availability of uncertainty estimation capabilities within the models.
+        \item A statistical numerical approach where sampled z-scores are compared to standard normal distributions for binned data. In contrast to the single value numerical approach, our statistical method examines both uncertainty estimates and residuals to assess situations where uncertainty measures inadequately reflect actual model errors.
+    \end{enumerate}
+    \item While method 1 relies on a researcher's intuition regarding the chemical domain, methods 2 and 3 are more general and do not require such domain-specific knowledge. For methods 2 and 3 to have a chance of success, it is crucial for method 1 to be effective. The success of method 1 sets the stage and provides a necessary foundation for the subsequent methods to yield meaningful results.
+    \item The numerical approaches use KDE to build models that can predict in-domain (ID) and out-of-domain (OD) samples.
+\end{itemize}
+
+%\input{sections/abstract}
+\input{sections/definitions}
+\input{sections/introduction}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/conclusion}
+\input{sections/data_availability}
+\input{sections/acknowledgements}
+
+\pagebreak
+\printbibliography[heading=bibintoc]
+\pagebreak
+\input{sections/supplemental}
+
+\end{document}

@@ -1,0 +1,202 @@
+\section{Methods}
+
+\subsection{Software Tools Used}
+\begin{itemize}
+    \item Machine Learning and Feature Generation: Materials Simulation Toolkit for Machine Learning (MAST-ML) \cite{Jacobs2020}.
+    \item Machine Learning: Scikit-learn \cite{scikit-learn}.
+    \item Text Refinement: ChatGPT \cite{gpt-3.5}.
+\end{itemize}
+
+\subsection{Definition of Techniques}
+
+\begin{enumerate}
+
+    \item General Method for Uncertainty Quantification:
+
+    \begin{enumerate}
+        \item Start with an ensemble model (random forest regressor).
+        \item Acquire individual predictions from each model from the ensemble.
+        \item Calculate standard deviation of predictions, $\sigma_{u}$.
+        \item Calibrate uncertainties by minimizing log likelihood function as shown in \cite{Palmer2022}.
+        \item Our new, calibrated uncertainties become $\sigma_{c}=a\sigma_{u}+b$, where $a$ and $b$ are constants.
+    \end{enumerate}
+
+    \item General Method for KDE:
+
+    \begin{enumerate}
+        \item Features are standardized using standard scaler fit from training data.
+        \item A single bandwidth parameter is used with Gaussian kernels. The bandwidth is estimated automatically using a nearest neighbors algorithm as implemented in Scikit-learn. Specifically, we use the sklearn.cluster.estimate\_bandwidth method \cite{scikit-learn}.
+        \item Likelihoods are acquired from training data, and are shifted so that the maximum likelihood case is 1 because values are often very small otherwise.
+        \item We then transform scores by: 1-score which we call D.
+        \item When a KDE model is used to predict on cases, the likelihood is computed, shifted by the maximum likelihood value from training, and then transformed by 1-score.
+        \item Values of 1 means the point is not observed, and decreasing values are more likely to be observed.
+    \end{enumerate}
+
+    \item General Method for Chemical Domain Tests. For observation i from the original set of data containing the target variable:
+
+        \begin{enumerate}
+            \item Leave out sample i from the original set, and leave out all other cases that do not have target variables.
+            \item Train a regression model on the left in data and calibrate uncertainties.
+            \item Fit a KDE with a Gaussian kernel on the left in data.
+            \item Predict $\hat{y}$, $\sigma_{c}$, and $D$ on the left out data.
+            \item We repeat the procedure for all cases in the original set and aggregate data. If there are $n$ cases that contain target variables, then there should be $n$ different models by the time the procedure finishes.
+        \end{enumerate}
+
+    \item General Method for Single Numerical Tests:
+
+    \begin{enumerate}
+        \item Start with any subset of data that contains target variables.
+        
+        \item Split the data for 5-fold cross validation (CV). Iteratively fit on 4 folds and then predict $\hat{y}$, $\sigma_{c}$, and $D$ on left out data of 1 fold.
+        
+        \item Pre-cluster data using agglomerate clustering. Iteratively bootstrap samples from all clusters, leave one cluster out for testing, and use all other clusters to train model. Then, predict $\hat{y}$, $\sigma_{c}$, and $D$ on the left out data. Perform clustering to produce 2 and 3 clusters, which is similarly applied in \cite{loco, Meredig2018}. We can repeatedly perform this procedure with slightly different data for each model due to boostrapping.
+        
+        \item Aggregate all statistics on left out data.
+        
+        \item Calculate $\sigma_{y}$, normalize absolute residuals by $\sigma_{y}$ ($|y-\hat{y}|/\sigma_{y}$) for each test case, and define ID as cases that score less than 1 of $|y-\hat{y}|/\sigma_{y}$ (OD otherwise). Below a value of 1, we can yield predictions that have an error less than $\sigma_{y}$, which serves as a measure of data dispersion. Our objective is to keep predictions with residuals smaller in magnitude than the dispersion of the data. By doing so, we aim to ensure that the model's predictions are statistically significant and meaningful relative to the inherent variability present in the data.
+        
+        \item Find the threshold that maximizes the F1 score. The F1 score is the harmonic mean between recall and precision. We also provide the threshold where the precision is 95\% or greater.
+    \end{enumerate}
+
+    \item General Method for Statistical Numerical Tests:
+
+    \begin{enumerate}
+        \item Use data from ``General Method for Single Numerical Tests.''
+        \item Bin data along $D$ into 10 bins of equal size.
+        \item Compare the distribution of z-scores in each bin to a standard normal distribution. We calculate the area between the CDF of a standard normal distribution to our sampled z-scores.
+        \item Define that a miscalibration area of 0.05 or greater indicates OD data, ID otherwise. While there may not be a theoretical justification for the specific cutoff value mentioned, in practice, we have observed that a miscalibration area of 0.05 effectively separates our ID and OD classes.
+    \end{enumerate}
+    
+\end{enumerate}
+
+\subsection{Diffusion}
+
+\begin{enumerate}
+
+    \item Data Curation and Feature Selection
+    
+    \begin{enumerate}
+        \item Diffusion activation energies (target variable) of single atom impurities in metal hosts were acquired from \cite{Lu2019, Wu2017}. The total number of cases are 408. We refer to these compositions as the original set.
+        \item Features were generated using MAST-ML feature generator with the following convention: [host][impurity]. The resulting features are the average, maximum, and minimum values of atomistic features for the host and impurities. The host and impurity elements are weighted equally because the exact atomic specie counts are unknown.
+        \item We also generated features for host and impurity combinations across all chemical groups on the periodic table, but made sure to only include compositions outside the original data set (no target variable data). We assign ID or OD to each chemical group based on intuition.
+
+        \begin{itemize}
+            \item OD: Alkali metals
+            \item ID: Alkaline earth metals
+            \item ID: Transition metals
+            \item ID: Post-transition metals
+            \item OD: Metalloids
+            \item OD: Reactive nonmetals
+            \item OD: Noble gases
+            \item OD: Lanthanides
+            \item OD: Actinides
+            \item OD: Unkown properties: Mt, Ds, Rg, Cn, Nh, Fl, Mc, Lv, Ts, and Og.
+            \item OD: Manual: [Fe][O], [Fe][Cl], [Na][Cl], [Al][Br], [Ca][P], and [Sr][I].
+        \end{itemize}
+
+        \item We use the EnsembleModelFeatureSelector from MAST-ML and reduce the number of features to 25.
+    
+    \end{enumerate}
+
+    \item Perform chemical, single numerical, and statistical numerical tests.
+    
+  \end{enumerate}
+
+\subsection{Steel Yield Strength}
+
+\begin{enumerate}
+    \item Data Curation and Feature Selection
+
+    \begin{enumerate}
+        \item Data were acquired from (citations). Our target variable is yield strength.
+        \item Similar to our diffusion study, we used MAST-ML to generate features. However, we have the percent composition of constituent elements. We can take not only the maximum and minimum of features, but we also use the weighed averages with the elemental fractions as our weights. Our final feature count is 377.
+
+        \item From our original dataset, we grab a composition, increment the each element by a small random number, and then get the percent composition. Features are produced in the same manner for this dataset. Perturbed Original is the name of this sub-set of data. We consider these data ID.
+
+        \item We also generate features for semi-randomly selected materials from \cite{nickel_institute} (either majority Cu, FE, or Al).  We assign ID or OD to each chemical group based on intuition.
+        
+        \begin{enumerate}
+            \item OD Cu Based: Cu98.05Be1.7Co.25
+            \item OD Cu Based: Cu85Zn15
+            \item OD Cu Based: Cu89.8Sn10P0.2
+            \item OD Cu Based: Cu92Ni4Sn4
+            \item OD Cu Based: Cu85Zn5Pb5Sn5
+            \item OD Al Based: Al95Si5
+            \item OD Al Based: Al90Mg10
+            \item OD Al Based: Al92.5Mg1.5Ni2Cu4
+            \item OD Al Based: Al83.5Si12Mg1Ni2.5Cu1
+            \item OD Al Based: Al88Cu3.5Si8.5
+            \item OD Fe Based: Fe99.1C0.2Mn0.45Si0.25
+            \item OD Fe Based: Fe96.49C0.21Mn0.75Si0.25Ni2.3
+            \item OD Fe Based: Fe60.6Ni35Si2C2.4
+            \item OD Fe Based: Fe42.45Cr18Ni39C0.55
+            \item OD Fe Based: Fe63Cr28Ni9
+        \end{enumerate}
+
+        \item We use the EnsembleModelFeatureSelector from MAST-ML and reduce the number of features to 7.
+    
+    \end{enumerate}
+    
+    \item Perform chemical, single numerical, and statistical numerical tests.
+
+\end{enumerate}
+
+
+\subsection{Fluence}
+\begin{enumerate}
+    \item Data Curation and Feature Selection
+
+    \begin{enumerate}
+        \item Data were acquired from (insert citation). Measured DT41J [C] is our target variable.
+        \item Unlike previous data sets, elemental feature generation was not conducted. Instead, the features for the fluence data include the weight percentages of Cu, Ni, Mn, P, Si, and C in majority Fe materials. Additional features include irradiation fluence, and flux.
+        \item We include the same materials from \cite{nickel_institute} without target variables.
+        \item From our original dataset, we grab a composition, increment the each element by a small random number, and then get the percent composition. Features are produced in the same manner for this dataset. Perturbed Original is the name of this sub-set of data. We consider these data ID.
+        \item We now change our features to be the exact weight percent of each element in each material. For cases that do not include irradiation fluence or flux, we performer mean imputation.
+        \item No feature selection.
+    \end{enumerate}
+
+    \item Perform chemical, single numerical, and statistical numerical tests.
+
+\end{enumerate}
+
+\subsection{Super Conduction}
+
+\begin{enumerate}
+    \item Data Curation and Feature Selection
+
+    \begin{enumerate}
+        \item Material compositions and super conduction temperatures were acquired from \cite{Stanev2018}. We learn on the maximum temperature at which a material is capable of super conduction $T_{C}$.
+        \item Unlike previous efforts at feature selection, the features from this work were taken from (cite) which still used the feature generation methodology from MAST-ML. We have 25 features.
+    \end{enumerate}
+
+    \item Chemical Assessment
+
+    \begin{enumerate}
+        \item We split our data into two sets: cases with $T_{C}$ $>$ 50 $[K]$ ($T_{high}$) and cases with $T_{C}$ $\leq$ 50 $[K]$ ($T_{low}$). Although many ways exist in which we can separate our material classes, we chose to split our data on high temperature and low temperature super conductors. In principle, we want to show that models fit to low temperature super conductors cannot predict on high temperature super conductors and vice versa.
+        \item For $T_{high}$ and $T_{low}$, we performed the general chemical domain test. For example, if we learn on $T_{high}$ we treat $T_{low}$ as if it were the dataset without target variables and vice versa.
+    \end{enumerate}
+
+    \item Numerical Assessment
+
+    \begin{enumerate}
+        \item We do not split data into $T_{high}$ and $T_{low}$.
+        \item Perform single and statistical numerical tests.
+    \end{enumerate}
+
+\end{enumerate}
+
+\subsection{Friedman}
+\begin{enumerate}
+    \item Data Curation and Feature Selection
+
+    \begin{enumerate}
+        \item We acquired data from the scikit-learn make\_friedman1 method, with 5 features and 1,000 points \cite{scikit-learn}.
+    \end{enumerate}
+
+    \item Numerical Assessment
+
+    \begin{itemize}
+        \item Perform single and statistical numerical tests.
+        \item No chemical domain test were performed because the Friedman data is built from a function and not chemistry.
+    \end{itemize}
+\end{enumerate}
